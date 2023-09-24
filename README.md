@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/shumatsumoto/wasm-graphic/assets/11171872/66730d23-7eff-4f42-8160-77036ef66000" width="500">
+  <img src="https://user-images.githubusercontent.com/11171872/203345580-40a14fa9-b1f0-4c29-a042-138ff78f7d9b.jpg" width="500">
 </div>
 
 <h1 align="center">Wasm Graphic</h1>
