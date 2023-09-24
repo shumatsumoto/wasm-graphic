@@ -4,9 +4,17 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 extern "C" {
     pub fn alert(s: &str);
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
+
 // JavaScript が呼び出せる Rust 関数
 #[wasm_bindgen]
 pub fn greet(name: &str) {
-    alert(&format!("ddd, {}!", name));
+    alert(&format!("Hello, {}!", name));
+}
+
+pub fn output_log(name: &str) {
+    log(&format!("Hello {}!!!", name))
 }
