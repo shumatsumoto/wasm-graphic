@@ -6,11 +6,17 @@
   </head>
   <body>
     <script type="module">
-      import init, { greet } from "./pkg/wasm_graphic.js";
-      init().then(() => {
-        greet("shu");
-        output_log("shu");
-      });
+      (async () => {
+        const bin = await (
+          await fetch(
+            "./target/wasm32-unknown-unknown/release/wasm_graphic.wasm"
+          )
+        ).arrayBuffer();
+        const wasm = await WebAssembly.instantiate(bin);
+        const ex = wasm.instance.exports;
+        const twice = ex.twice;
+        document.body.textContent = `6を2倍すると ${twice(12)}`;
+      })();
     </script>
   </body>
 </html>
