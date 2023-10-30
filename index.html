@@ -5,18 +5,117 @@
     <title>hello-wasm example</title>
   </head>
   <body>
+    <canvas id="screen" width="500px" height="500px"></canvas>
     <script type="module">
-      (async () => {
-        const bin = await (
-          await fetch(
-            "./target/wasm32-unknown-unknown/release/wasm_graphic.wasm"
-          )
-        ).arrayBuffer();
-        const wasm = await WebAssembly.instantiate(bin);
-        const ex = wasm.instance.exports;
-        const twice = ex.twice;
-        document.body.textContent = `6を2倍すると ${twice(12)}`;
-      })();
+      // (async () => {
+      //   const bin = await (
+      //     await fetch(
+      //       "./target/wasm32-unknown-unknown/release/wasm_graphic.wasm"
+      //     )
+      //   ).arrayBuffer();
+
+      //   let module = {};
+      //   let mod = results.instance;
+      //   module.alloc = mod.exports.alloc;
+      //   module.dealloc = mod.exports.dealloc;
+      //   module.fill = mod.exports.fill;
+
+      //   var width = 500;
+      //   var height = 500;
+
+      //   var canvas = document.getElementById("screen");
+      //   if (canvas.getContext) {
+      //     var ctx = canvas.getContext("2d");
+
+      //     let byteSize = width * height * 4;
+      //     var pointer = module.alloc(byteSize);
+
+      //     var usub = new Uint8ClampedArray(
+      //       mod.exports.memory.buffer,
+      //       pointer,
+      //       byteSize
+      //     );
+      //     var img = new ImageData(usub, width, height);
+
+      //     var start = null;
+      //     function step(timestamp) {
+      //       var progress;
+      //       if (start === null) start = timestamp;
+      //       progress = timestamp - start;
+      //       if (progress > 100) {
+      //         module.fill(pointer, width, height, timestamp);
+
+      //         start = timestamp;
+
+      //         window.requestAnimationFrame(draw);
+      //       } else {
+      //         window.requestAnimationFrame(step);
+      //       }
+      //     }
+
+      //     function draw() {
+      //       ctx.putImageData(img, 0, 0);
+      //       window.requestAnimationFrame(step);
+      //     }
+
+      //     window.requestAnimationFrame(step);
+      //   }
+      // })();
+
+      fetch("./target/wasm32-unknown-unknown/release/wasm_graphic.wasm")
+        .then((response) => response.arrayBuffer())
+        .then((bytes) =>
+          // the Rust side needs a cos function
+          WebAssembly.instantiate(bytes, { env: { cos: Math.cos } })
+        )
+        .then((results) => {
+          let module = {};
+          let mod = results.instance;
+          module.alloc = mod.exports.alloc;
+          module.dealloc = mod.exports.dealloc;
+          module.fill = mod.exports.fill;
+
+          var width = 500;
+          var height = 500;
+
+          var canvas = document.getElementById("screen");
+          if (canvas) {
+            var ctx = canvas.getContext("2d");
+
+            let byteSize = width * height * 4;
+            var pointer = module.alloc(byteSize);
+
+            var usub = new Uint8ClampedArray(
+              mod.exports.memory.buffer,
+              pointer,
+              byteSize
+            );
+            var img = new ImageData(usub, width, height);
+
+            var start = null;
+            function step(timestamp) {
+              var progress;
+              if (start === null) start = timestamp;
+              progress = timestamp - start;
+              if (progress > 100) {
+                module.fill(pointer, width, height, timestamp);
+
+                start = timestamp;
+
+                window.requestAnimationFrame(draw);
+              } else {
+                window.requestAnimationFrame(step);
+              }
+            }
+
+            function draw() {
+              ctx.putImageData(img, 0, 0);
+              window.requestAnimationFrame(step);
+            }
+
+            window.requestAnimationFrame(step);
+          }
+        });
     </script>
   </body>
 </html>
